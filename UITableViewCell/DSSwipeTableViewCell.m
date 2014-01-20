@@ -41,14 +41,12 @@
 
 @implementation DSSwipeTableViewCell
 
+@synthesize leftAreaWidth = _leftAreaWidth, rightAreaWidth = _rightAreaWidth;
+
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
-        
-        // Set default values
-        _leftAreaWidth = DEFAULT_BUTTON_SIZE;
-        _rightAreaWidth = DEFAULT_BUTTON_SIZE;
         
         self.contentView.backgroundColor = [UIColor whiteColor];
         
@@ -100,6 +98,10 @@
     CGPoint viewLocationPoint = CGPointMake(swipeViewOrigin.x+translatedPoint.x, swipeViewOrigin.y);
     CGFloat centerX = self.bounds.size.width/2;
     CGFloat viewOffsetX = viewLocationPoint.x - centerX;
+    
+    // hide opposite viewArea
+    _leftArea.hidden = (viewOffsetX <= 0);
+    _rightArea.hidden = (viewOffsetX >= 0);
     
     // set view location
     panGestureRecognizer.view.center = viewLocationPoint;
@@ -154,11 +156,11 @@
     }
 }
 
-- (void)setLeftAreaEnabled:(BOOL)enabled {
-    if ([self leftAreaEnabled] != enabled) {
-        _leftArea = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _leftAreaWidth, self.bounds.size.height-.5f)];
-        _leftArea.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+- (void)setLeftAreaEnabled:(BOOL)leftAreaEnabled {
+    if ([self leftAreaEnabled] != leftAreaEnabled) {
+        _leftArea = [[UIView alloc] init];
         _leftArea.backgroundColor = DEFAULT_BUTTON_COLOR;
+        [self setLeftAreaWidth:0];
         [self addSubview:_leftArea];
         [self sendSubviewToBack:_leftArea];
     }
@@ -168,11 +170,11 @@
     return _leftArea != nil;
 }
 
-- (void)setRightAreaEnabled:(BOOL)enabled {
-    if ([self rightAreaEnabled] != enabled) {
-        _rightArea = [[UIView alloc] initWithFrame:CGRectMake(self.bounds.size.width-_rightAreaWidth, 0, _rightAreaWidth, self.bounds.size.height-.5f)];
-        _rightArea.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
+- (void)setRightAreaEnabled:(BOOL)rightAreaEnabled {
+    if ([self rightAreaEnabled] != rightAreaEnabled) {
+        _rightArea = [[UIView alloc] init];
         _rightArea.backgroundColor = DEFAULT_BUTTON_COLOR;
+        [self setRightAreaWidth:0];
         [self addSubview:_rightArea];
         [self sendSubviewToBack:_rightArea];
     }
@@ -188,6 +190,26 @@
 
 - (BOOL)isShowingRightArea {
     return self.contentView.frame.origin.x < 0;
+}
+
+- (void)setLeftAreaWidth:(float)leftAreaWidth {
+    _leftAreaWidth = leftAreaWidth;
+    _leftArea.frame = CGRectMake(0, 0, leftAreaWidth?leftAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height-.5f);
+    _leftArea.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+}
+
+- (float)leftAreaWidth {
+    return self.leftAreaWidth;
+}
+
+- (void)setRightAreaWidth:(float)rightAreaWidth {
+    _rightAreaWidth = rightAreaWidth;
+    _rightArea.frame = CGRectMake(self.bounds.size.width-(rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE), 0, rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height-.5f);
+    _rightArea.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
+}
+
+- (float)rightAreaWidth {
+    return self.rightAreaWidth;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {

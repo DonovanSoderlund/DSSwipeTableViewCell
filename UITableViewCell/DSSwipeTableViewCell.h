@@ -39,8 +39,8 @@
 /*
  Sets the width for each area. Default value is 100.
  */
-@property float leftAreaWidth;
-@property float rightAreaWidth;
+@property (nonatomic) float leftAreaWidth;
+@property (nonatomic) float rightAreaWidth;
 
 /*
  Tells you if an area is showing.
