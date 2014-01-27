@@ -22,7 +22,23 @@
 
 #import <UIKit/UIKit.h>
 
+@class DSSwipeTableViewCell;
+
+@protocol DSSwipeTableViewCellDelegate <NSObject>
+
+@optional
+- (void)swipeCellDidStartSwiping:(DSSwipeTableViewCell*)cell;
+- (void)swipeCellDidEndSwiping:(DSSwipeTableViewCell*)cell;
+- (void)swipeCellWillEndSwiping:(DSSwipeTableViewCell*)cell;
+
+@end
+
 @interface DSSwipeTableViewCell : UITableViewCell
+
+/*
+ Delegate
+ */
+@property (weak, readwrite, nonatomic) id<DSSwipeTableViewCellDelegate> delegate;
 
 /*
  Views that should be populated with content of choice.
@@ -52,5 +68,7 @@
  Enables or disables swiping. Default value is YES;
  */
 @property (nonatomic) BOOL swipingEnabled;
+
+- (void)resetAnimated:(BOOL)animated;
 
 @end

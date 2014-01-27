@@ -1,4 +1,4 @@
-// DSSwipeTableViewCell
+// DSSwipeTableViewCell.m
 //
 // Copyright (c) 2014 Donovan Söderlund ( http://donovan.se )
 //
@@ -63,10 +63,10 @@
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     if ([self pointInside:point withEvent:event]) {
         if (point.x < self.contentView.frame.origin.x) {
-            return _leftArea;
+            return [_leftArea hitTest:[_leftArea convertPoint:point fromView:self] withEvent:event];
         }
         else if (point.x > self.contentView.frame.origin.x + self.contentView.frame.size.width) {
-            return _rightArea;
+            return [_rightArea hitTest:[_rightArea convertPoint:point fromView:self] withEvent:event];
         }
         else {
             return self.contentView;
@@ -93,6 +93,11 @@
         swipeViewOrigin = panGestureRecognizer.view.center;
     }
     
+    if (!_swipingEnabled) {
+        panGestureRecognizer.view.center = swipeViewOrigin;
+        return;
+    }
+    
     // add translated point to reference points
     CGPoint translatedPoint = [panGestureRecognizer translationInView:self];
     CGPoint viewLocationPoint = CGPointMake(swipeViewOrigin.x+translatedPoint.x, swipeViewOrigin.y);
@@ -104,7 +109,7 @@
     _rightArea.hidden = (viewOffsetX >= 0);
     
     // set view location
-    panGestureRecognizer.view.center = viewLocationPoint;
+    if ([panGestureRecognizer locationInView:self].x > 30) panGestureRecognizer.view.center = viewLocationPoint;
     
     // rubber banding
     CGFloat currentLeftButtonWidth = _leftArea.frame.size.width;
@@ -125,14 +130,12 @@
     if (abs(translatedPoint.y) > PAN_CANCEL_DISTANCE && !panInProgress) {
         panGestureRecognizer.enabled = NO;
         panGestureRecognizer.enabled = YES;
-        [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:2 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
-            panGestureRecognizer.view.center = CGPointMake(centerX, swipeViewOrigin.y);
-        } completion:^(BOOL finished) {
-            panInProgress = NO;
-        }];
+        [self resetAnimated:NO];
     }
     else if (abs(translatedPoint.x) > PAN_CANCEL_DISTANCE && !panInProgress) {
         panInProgress = YES;
+        // Call delegate method
+        if ([self.delegate respondsToSelector:@selector(swipeCellDidStartSwiping:)]) [self.delegate swipeCellDidStartSwiping:self];
     }
     
     // when pan ends (set final x to be either back to origin or showing buttons)
@@ -147,11 +150,16 @@
             finalX += _leftArea.frame.size.width;
         }
         
+        // Call delegate method
+        if ([self.delegate respondsToSelector:@selector(swipeCellDidEndSwiping:)]) [self.delegate swipeCellWillEndSwiping:self];
+        
         // animate slideView
-        [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:2 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:1 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
             panGestureRecognizer.view.center = CGPointMake(finalX, swipeViewOrigin.y);
         } completion:^(BOOL finished) {
             panInProgress = NO;
+            // Call delegate method
+            if ([self.delegate respondsToSelector:@selector(swipeCellDidEndSwiping:)]) [self.delegate swipeCellDidEndSwiping:self];
         }];
     }
 }
@@ -194,22 +202,22 @@
 
 - (void)setLeftAreaWidth:(float)leftAreaWidth {
     _leftAreaWidth = leftAreaWidth;
-    _leftArea.frame = CGRectMake(0, 0, leftAreaWidth?leftAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height-.5f);
+    _leftArea.frame = CGRectMake(0, 0, leftAreaWidth?leftAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height);
     _leftArea.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 }
 
 - (float)leftAreaWidth {
-    return self.leftAreaWidth;
+    return _leftAreaWidth;
 }
 
 - (void)setRightAreaWidth:(float)rightAreaWidth {
     _rightAreaWidth = rightAreaWidth;
-    _rightArea.frame = CGRectMake(self.bounds.size.width-(rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE), 0, rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height-.5f);
+    _rightArea.frame = CGRectMake(self.bounds.size.width-(rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE), 0, rightAreaWidth?rightAreaWidth:DEFAULT_BUTTON_SIZE, self.bounds.size.height);
     _rightArea.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
 }
 
 - (float)rightAreaWidth {
-    return self.rightAreaWidth;
+    return _rightAreaWidth;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
@@ -224,6 +232,8 @@
 {
     if (![self isShowingLeftArea] && ![self isShowingRightArea]) {
         [super setSelected:selected animated:animated];
+        self.leftArea.hidden = selected;
+        self.rightArea.hidden = selected;
         [self panGestureRecognizer].enabled = !selected;
     }
 }
@@ -231,15 +241,32 @@
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
     if (![self isShowingLeftArea] && ![self isShowingRightArea] && highlighted) {
         [super setHighlighted:highlighted animated:animated];
+        self.leftArea.hidden = highlighted;
+        self.rightArea.hidden = highlighted;
     }
     else if (!highlighted) {
         [super setHighlighted:highlighted animated:animated];
+        self.leftArea.hidden = highlighted;
+        self.rightArea.hidden = highlighted;
     }
 }
 
 - (void)prepareForReuse {
     [super prepareForReuse];
-    self.contentView.center = self.center;
+    [self resetAnimated:NO];
+    self.swipingEnabled = YES;
+    self.hidden = NO;
+}
+
+- (void)resetAnimated:(BOOL)animated {
+    if ([self isShowingLeftArea] || [self isShowingRightArea]) {
+        if (animated) {
+            [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:2 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState animations:^{
+                self.contentView.center = CGPointMake(self.bounds.size.width/2, swipeViewOrigin.y);
+            } completion:nil];
+        }
+        else self.contentView.center = CGPointMake(self.bounds.size.width/2, swipeViewOrigin.y);
+    }
 }
 
 @end

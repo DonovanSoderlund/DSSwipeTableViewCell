@@ -1,10 +1,14 @@
 # DSSwipeTableViewCell
 
-#### A drop-in replacement for `UITableViewCell` with horizontal scrolling to reveal a custom view, similar to Apple's swipe to delete button.
+##### A drop-in replacement for `UITableViewCell` with horizontal scrolling to reveal a custom view, similar to Apple's swipe to delete button.
 
 ## Installation
 
-Copy files in DSSwipeTableViewCell/ into your project and import DSSwiptTableViewCell.h in your `UITableViewController`
+#### CocoaPods
+add `pod 'DSSwipeTableViewCell'` to your podfile.
+
+#### Manual
+Copy files in DSSwipeTableViewCell/ into your project and import DSSwipeTableViewCell.h in your `UITableViewController`.
 
 ## Usage
 
