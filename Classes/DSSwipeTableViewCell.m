@@ -141,7 +141,7 @@
     // when pan ends (set final x to be either back to origin or showing buttons)
     if (panGestureRecognizer.state == UIGestureRecognizerStateEnded) {
         CGPoint panVelocity = [panGestureRecognizer velocityInView:self];
-        CGFloat finalX = centerX;
+        CGFloat finalX = 0;
         
         if (viewLocationPoint.x < centerX && panVelocity.x < 0 && [self rightAreaEnabled]) {
             finalX -= _rightArea.frame.size.width;
@@ -155,7 +155,7 @@
         
         // animate slideView
         [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:1 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
-            panGestureRecognizer.view.center = CGPointMake(finalX, swipeViewOrigin.y);
+            panGestureRecognizer.view.frame = CGRectOffset(panGestureRecognizer.view.bounds, finalX, 0);
         } completion:^(BOOL finished) {
             panInProgress = NO;
             // Call delegate method
