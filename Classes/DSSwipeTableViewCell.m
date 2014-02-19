@@ -256,16 +256,17 @@
     [self resetAnimated:NO];
     self.swipingEnabled = YES;
     self.hidden = NO;
+    panInProgress = NO;
 }
 
 - (void)resetAnimated:(BOOL)animated {
     if ([self isShowingLeftArea] || [self isShowingRightArea]) {
         if (animated) {
             [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:1.0f initialSpringVelocity:2 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState animations:^{
-                self.contentView.center = CGPointMake(self.bounds.size.width/2, swipeViewOrigin.y);
+                self.contentView.frame = self.contentView.bounds;
             } completion:nil];
         }
-        else self.contentView.center = CGPointMake(self.bounds.size.width/2, swipeViewOrigin.y);
+        else self.contentView.frame = self.contentView.bounds;
     }
 }
 
