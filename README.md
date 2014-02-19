@@ -44,9 +44,11 @@ Use as a drop-in replacement for `UITableViewCell`. Enable and disable the swipe
 }
 ```
 
+Although you should really subclass `DSSwipeTableViewCell` and then add content to the left and right areas.
+
 ## Demo
 
-Coming up soon...
+![Screenshot](demo.png "Demonstration")
 
 ## Requirements
 
