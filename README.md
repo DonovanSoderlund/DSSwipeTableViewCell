@@ -48,7 +48,7 @@ Although you should really subclass `DSSwipeTableViewCell` and then add content 
 
 ## Demo
 
-![Screenshot](demo.png "Demonstration")
+![Screenshot](demo.gif "Demonstration")
 
 ## Requirements
 
