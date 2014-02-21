@@ -35,6 +35,9 @@
     // To control panning and tableView scrolling
     BOOL panInProgress;
     BOOL scrollInProgress;
+    
+    // Custom backgroundview to hide areas on cell neighbour selection
+    UIView *backgroundView;
 }
 
 @end
@@ -48,9 +51,13 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         
-        self.contentView.backgroundColor = [UIColor whiteColor];
-        
         [self prepareForReuse];
+        
+        // A custom backgroundview that prevents displaying areas when selecting cell neighbours
+        backgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height+1)];
+        backgroundView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+        backgroundView.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:backgroundView];
         
         // Add pan gesture
         UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_panGestureRecognized:)];
@@ -270,6 +277,10 @@
         }
         else self.contentView.frame = self.contentView.bounds;
     }
+}
+
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+    backgroundView.backgroundColor = backgroundColor;
 }
 
 @end
