@@ -50,6 +50,8 @@
         
         self.contentView.backgroundColor = [UIColor whiteColor];
         
+        [self prepareForReuse];
+        
         // Add pan gesture
         UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(_panGestureRecognized:)];
         panGestureRecognizer.delegate = self;
