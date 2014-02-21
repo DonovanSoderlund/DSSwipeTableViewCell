@@ -1,21 +1,15 @@
-# DSSwipeTableViewCell
+//
+//  SwipeCell.m
+//  Example
+//
+//  Created by Donovan Söderlund on 20/02/14.
+//  Copyright (c) 2014 Donovan Söderlund. All rights reserved.
+//
 
-##### A drop-in replacement for `UITableViewCell` with horizontal scrolling to reveal a custom view, similar to Apple's swipe to delete button.
+#import "SwipeCell.h"
 
-## Installation
+@implementation SwipeCell
 
-#### CocoaPods
-add `pod 'DSSwipeTableViewCell'` to your podfile.
-
-#### Manual
-Copy files in DSSwipeTableViewCell/ into your project and import DSSwipeTableViewCell.h in your `UITableViewController`.
-
-## Usage
-
-Use as a drop-in replacement for `UITableViewCell`. Enable and disable the swipe areas and add content to them.
-
-It's recommended to subclass `DSSwipeTableViewCell` and setup the areas with buttons etc.
-``` objective-c
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
@@ -43,23 +37,5 @@ It's recommended to subclass `DSSwipeTableViewCell` and setup the areas with but
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action" message:@"Right button was pressed" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
     [alert show];
 }
-```
 
-## Demo
-
-![Screenshot](demo.gif "Demonstration")
-
-## Requirements
-
-`DSSwipeTableViewCell` is compatible with iOS 7.0+
-
-## Contact
-
-Donovan Söderlund
-
-- http://github.com/DonovanSoderlund
-- http://twitter.com/DonovanSoder
-
-## License
-
-DSSwipeTableViewCell is available under the MIT License (MIT)
+@end
